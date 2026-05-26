@@ -1,6 +1,6 @@
-// Téléchargement + filtrage des données Natural Earth pour les Antilles.
-// Lance une seule fois : `node scripts/build-data.mjs`
-// Produit public/caribbean.geojson
+// Téléchargement + filtrage des données Natural Earth pour plusieurs régions.
+// Lance : `node scripts/build-data.mjs`
+// Produit public/caribbean.geojson ET public/africa.geojson
 
 import { writeFileSync, mkdirSync, existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -9,16 +9,13 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 
-// Source : Natural Earth Vector "map units" 10m — inclut Porto Rico, Guadeloupe,
-// Martinique, etc. comme entités séparées.
 const SOURCE_URL =
   "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_0_map_units.geojson";
 
 const CACHE = resolve(ROOT, "scripts", ".ne_map_units.geojson");
-const OUT = resolve(ROOT, "public", "caribbean.geojson");
 
-// Table (code ISO_A2 ou nom Natural Earth) -> nom français + statut
-const TARGETS = {
+// ============================== ANTILLES ==============================
+const TARGETS_CARIBBEAN = {
   CU: { fr: "Cuba", statut: "indépendant" },
   JM: { fr: "Jamaïque", statut: "indépendant" },
   HT: { fr: "Haïti", statut: "indépendant" },
@@ -49,9 +46,7 @@ const TARGETS = {
   MQ: { fr: "Martinique", statut: "France" },
 };
 
-// Filets de secours : certains territoires ont ISO_A2 = "-99" dans Natural Earth.
-// On capte alors par nom (case-insensitive, sous-chaîne).
-const NAME_FALLBACKS = [
+const NAME_FALLBACKS_CARIBBEAN = [
   { match: /saint[- ]barth/i, key: "BL" },
   { match: /saint[- ]martin/i, key: "MF" },
   { match: /sint maarten/i, key: "SX" },
@@ -59,6 +54,74 @@ const NAME_FALLBACKS = [
   { match: /bonaire|saba|sint eustatius/i, key: "BQ" },
 ];
 
+// ============================== AFRIQUE ==============================
+const TARGETS_AFRICA = {
+  DZ: { fr: "Algérie", statut: "indépendant" },
+  AO: { fr: "Angola", statut: "indépendant" },
+  BJ: { fr: "Bénin", statut: "indépendant" },
+  BW: { fr: "Botswana", statut: "indépendant" },
+  BF: { fr: "Burkina Faso", statut: "indépendant" },
+  BI: { fr: "Burundi", statut: "indépendant" },
+  CM: { fr: "Cameroun", statut: "indépendant" },
+  CV: { fr: "Cap-Vert", statut: "indépendant" },
+  CF: { fr: "République centrafricaine", statut: "indépendant" },
+  TD: { fr: "Tchad", statut: "indépendant" },
+  KM: { fr: "Comores", statut: "indépendant" },
+  CG: { fr: "République du Congo", statut: "indépendant" },
+  CD: { fr: "République démocratique du Congo", statut: "indépendant" },
+  DJ: { fr: "Djibouti", statut: "indépendant" },
+  EG: { fr: "Égypte", statut: "indépendant" },
+  GQ: { fr: "Guinée équatoriale", statut: "indépendant" },
+  ER: { fr: "Érythrée", statut: "indépendant" },
+  SZ: { fr: "Eswatini", statut: "indépendant" },
+  ET: { fr: "Éthiopie", statut: "indépendant" },
+  GA: { fr: "Gabon", statut: "indépendant" },
+  GM: { fr: "Gambie", statut: "indépendant" },
+  GH: { fr: "Ghana", statut: "indépendant" },
+  GN: { fr: "Guinée", statut: "indépendant" },
+  GW: { fr: "Guinée-Bissau", statut: "indépendant" },
+  CI: { fr: "Côte d'Ivoire", statut: "indépendant" },
+  KE: { fr: "Kenya", statut: "indépendant" },
+  LS: { fr: "Lesotho", statut: "indépendant" },
+  LR: { fr: "Liberia", statut: "indépendant" },
+  LY: { fr: "Libye", statut: "indépendant" },
+  MG: { fr: "Madagascar", statut: "indépendant" },
+  MW: { fr: "Malawi", statut: "indépendant" },
+  ML: { fr: "Mali", statut: "indépendant" },
+  MR: { fr: "Mauritanie", statut: "indépendant" },
+  MU: { fr: "Maurice", statut: "indépendant" },
+  MA: { fr: "Maroc", statut: "indépendant" },
+  MZ: { fr: "Mozambique", statut: "indépendant" },
+  NA: { fr: "Namibie", statut: "indépendant" },
+  NE: { fr: "Niger", statut: "indépendant" },
+  NG: { fr: "Nigeria", statut: "indépendant" },
+  RW: { fr: "Rwanda", statut: "indépendant" },
+  ST: { fr: "Sao Tomé-et-Principe", statut: "indépendant" },
+  SN: { fr: "Sénégal", statut: "indépendant" },
+  SC: { fr: "Seychelles", statut: "indépendant" },
+  SL: { fr: "Sierra Leone", statut: "indépendant" },
+  SO: { fr: "Somalie", statut: "indépendant" },
+  ZA: { fr: "Afrique du Sud", statut: "indépendant" },
+  SS: { fr: "Soudan du Sud", statut: "indépendant" },
+  SD: { fr: "Soudan", statut: "indépendant" },
+  TZ: { fr: "Tanzanie", statut: "indépendant" },
+  TG: { fr: "Togo", statut: "indépendant" },
+  TN: { fr: "Tunisie", statut: "indépendant" },
+  UG: { fr: "Ouganda", statut: "indépendant" },
+  ZM: { fr: "Zambie", statut: "indépendant" },
+  ZW: { fr: "Zimbabwe", statut: "indépendant" },
+  EH: { fr: "Sahara occidental", statut: "territoire contesté" },
+  RE: { fr: "La Réunion", statut: "France" },
+  YT: { fr: "Mayotte", statut: "France" },
+};
+
+const NAME_FALLBACKS_AFRICA = [
+  { match: /western sahara|sahara occidental/i, key: "EH" },
+  { match: /south sudan/i, key: "SS" },
+  { match: /^sudan$/i, key: "SD" },
+];
+
+// ============================== TÉLÉCHARGEMENT ==============================
 async function getSource() {
   if (existsSync(CACHE)) {
     console.log("Cache trouvé :", CACHE);
@@ -73,20 +136,19 @@ async function getSource() {
   return JSON.parse(text);
 }
 
-function pickKey(props) {
-  // Essaie ISO_A2_EH d'abord (codes "de jure" propres, ex: MQ, GP, AG),
-  // puis ISO_A2 (parfois "-99" ou "FR-972").
-  for (const candidate of [props.ISO_A2_EH, props.ISO_A2]) {
-    if (candidate && TARGETS[candidate]) return candidate;
-  }
-  const name = (props.NAME || props.NAME_LONG || props.ADMIN || "").toString();
-  for (const { match, key } of NAME_FALLBACKS) {
-    if (match.test(name)) return key;
-  }
-  return null;
+function makePickKey(targets, fallbacks) {
+  return (props) => {
+    for (const candidate of [props.ISO_A2_EH, props.ISO_A2]) {
+      if (candidate && targets[candidate]) return candidate;
+    }
+    const name = (props.NAME || props.NAME_LONG || props.ADMIN || "").toString();
+    for (const { match, key } of fallbacks) {
+      if (match.test(name)) return key;
+    }
+    return null;
+  };
 }
 
-// Fusionne plusieurs Polygon/MultiPolygon en un MultiPolygon unique.
 function mergeGeometries(geoms) {
   const polygons = [];
   for (const g of geoms) {
@@ -98,38 +160,59 @@ function mergeGeometries(geoms) {
   return { type: "MultiPolygon", coordinates: polygons };
 }
 
-const src = await getSource();
-const groups = new Map(); // key -> { meta, geoms[], nameEn }
+function buildRegion(src, targets, fallbacks, outPath, label) {
+  const pickKey = makePickKey(targets, fallbacks);
+  const groups = new Map();
 
-for (const f of src.features) {
-  const key = pickKey(f.properties);
-  if (!key) continue;
-  let g = groups.get(key);
-  if (!g) {
-    g = {
-      meta: TARGETS[key],
-      geoms: [],
-      nameEn: f.properties.NAME || f.properties.NAME_LONG || f.properties.ADMIN,
-    };
-    groups.set(key, g);
+  for (const f of src.features) {
+    const key = pickKey(f.properties);
+    if (!key) continue;
+    let g = groups.get(key);
+    if (!g) {
+      g = {
+        meta: targets[key],
+        geoms: [],
+        nameEn: f.properties.NAME || f.properties.NAME_LONG || f.properties.ADMIN,
+      };
+      groups.set(key, g);
+    }
+    g.geoms.push(f.geometry);
   }
-  g.geoms.push(f.geometry);
+
+  const features = [];
+  for (const [key, g] of groups) {
+    features.push({
+      type: "Feature",
+      properties: { id: key, nom: g.meta.fr, statut: g.meta.statut, nameEn: g.nameEn },
+      geometry: mergeGeometries(g.geoms),
+    });
+  }
+
+  const missing = Object.keys(targets).filter((k) => !groups.has(k));
+  if (missing.length) {
+    console.warn(`⚠ [${label}] Non trouvés dans Natural Earth : ${missing.join(", ")}`);
+  }
+
+  mkdirSync(dirname(outPath), { recursive: true });
+  writeFileSync(outPath, JSON.stringify({ type: "FeatureCollection", features }));
+  console.log(`✓ [${label}] ${features.length} territoires écrits dans ${outPath}`);
 }
 
-const features = [];
-for (const [key, g] of groups) {
-  features.push({
-    type: "Feature",
-    properties: { id: key, nom: g.meta.fr, statut: g.meta.statut, nameEn: g.nameEn },
-    geometry: mergeGeometries(g.geoms),
-  });
-}
+// ============================== EXÉCUTION ==============================
+const src = await getSource();
 
-const missing = Object.keys(TARGETS).filter((k) => !groups.has(k));
-if (missing.length) {
-  console.warn("⚠ Territoires non trouvés dans Natural Earth :", missing.join(", "));
-}
+buildRegion(
+  src,
+  TARGETS_CARIBBEAN,
+  NAME_FALLBACKS_CARIBBEAN,
+  resolve(ROOT, "public", "caribbean.geojson"),
+  "Antilles"
+);
 
-mkdirSync(dirname(OUT), { recursive: true });
-writeFileSync(OUT, JSON.stringify({ type: "FeatureCollection", features }));
-console.log(`✓ ${features.length} territoires écrits dans ${OUT}`);
+buildRegion(
+  src,
+  TARGETS_AFRICA,
+  NAME_FALLBACKS_AFRICA,
+  resolve(ROOT, "public", "africa.geojson"),
+  "Afrique"
+);

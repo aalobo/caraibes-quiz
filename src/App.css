@@ -306,3 +306,171 @@
     font-size: 1.15rem;
   }
 }
+
+/* ============================== ÉCRAN D'ACCUEIL ============================== */
+.welcome {
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 50%, #f48fb1 100%);
+  box-sizing: border-box;
+}
+
+.welcome-card {
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: 0 20px 60px rgba(194, 24, 91, 0.2);
+  padding: 36px 32px;
+  max-width: 560px;
+  width: 100%;
+  text-align: center;
+}
+
+.welcome-title {
+  margin: 0 0 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #c2185b;
+  letter-spacing: 0.04em;
+}
+
+.welcome-sub {
+  margin: 0 0 28px;
+  color: #6b7280;
+  font-size: 1.05rem;
+}
+
+.welcome-regions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.region-card {
+  appearance: none;
+  border: 2px solid #fbcfe8;
+  background: #fff7fb;
+  border-radius: 16px;
+  padding: 24px 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  font-family: inherit;
+  color: #1f2937;
+}
+
+.region-card:hover {
+  border-color: #ec407a;
+  background: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(236, 64, 122, 0.18);
+}
+
+.region-emoji {
+  font-size: 2.6rem;
+  line-height: 1;
+}
+
+.region-label {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #c2185b;
+}
+
+/* ============================== BANDEAU : PILULE RÉGION ============================== */
+.region-pill {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.region-pill:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.region-pill .change {
+  opacity: 0.75;
+  font-size: 0.8rem;
+  margin-left: 4px;
+}
+
+/* ============================== SAISIE LIBRE ============================== */
+.typed {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.typed .indice {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.typed-row {
+  display: flex;
+  gap: 8px;
+}
+
+.typed input[type="text"] {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.typed input[type="text"]:focus {
+  border-color: #c2185b;
+  box-shadow: 0 0 0 3px rgba(194, 24, 91, 0.15);
+}
+
+.typed input[type="text"]:disabled {
+  background: #f9fafb;
+  color: #6b7280;
+}
+
+.typed button[type="submit"] {
+  appearance: none;
+  border: 0;
+  background: #c2185b;
+  color: #fff;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.typed button[type="submit"]:hover:not(:disabled) {
+  background: #ad1457;
+}
+
+.typed button[type="submit"]:disabled {
+  background: #f3a3c1;
+  cursor: not-allowed;
+}
