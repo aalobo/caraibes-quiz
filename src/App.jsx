@@ -77,6 +77,27 @@ function normalize(s) {
     .trim()
 }
 
+// Masque un nom à la façon du pendu : on garde la première lettre de chaque
+// mot (séparé par espace, tiret ou apostrophe) et on masque le reste avec •.
+function maskName(name) {
+  let out = ''
+  let inWord = false
+  for (const ch of name) {
+    if (/\p{L}/u.test(ch)) {
+      if (!inWord) {
+        out += ch
+        inWord = true
+      } else {
+        out += '•'
+      }
+    } else {
+      out += ch
+      inWord = false
+    }
+  }
+  return out
+}
+
 function buildTerritoryIcon(feature) {
   const suffix = STATUT_SHORT[feature.properties.statut]
   const suffixHtml = suffix ? ` <span class="land-suffix">(${escapeHtml(suffix)})</span>` : ''
@@ -461,6 +482,7 @@ export default function App() {
                       key={selected.properties.id}
                       ref={inputRef}
                       target={selected.properties.nom}
+                      statut={selected.properties.statut}
                       niveau={niveau}
                       answer={answer}
                       onSubmit={validerSaisie}
@@ -497,7 +519,10 @@ export default function App() {
 }
 
 // ============================== INPUT DE SAISIE ==============================
-const TypedInput = forwardRef(function TypedInput({ target, niveau, answer, onSubmit }, ref) {
+const TypedInput = forwardRef(function TypedInput(
+  { target, statut, niveau, answer, onSubmit },
+  ref
+) {
   const [val, setVal] = useState('')
   const localRef = useRef(null)
   useImperativeHandle(ref, () => ({
@@ -510,13 +535,27 @@ const TypedInput = forwardRef(function TypedInput({ target, niveau, answer, onSu
     onSubmit(val)
   }
 
-  const indice = niveau === 'moyen'
-    ? `${target.length} lettres, commence par « ${target[0]} »`
-    : null
+  // Compte uniquement les lettres (pas les espaces ni la ponctuation).
+  const nbLettres = [...target].filter((c) => /\p{L}/u.test(c)).length
+  const nbMots = target.trim().split(/[\s\-]+/).filter(Boolean).length
+  const masque = maskName(target)
 
   return (
     <form className="typed" onSubmit={handleSubmit}>
-      {indice && <p className="indice">Indice : {indice}</p>}
+      {niveau === 'moyen' && (
+        <div className="indices">
+          <p className="indice motif" aria-label="Motif">{masque}</p>
+          <ul className="indice-meta">
+            <li>
+              <strong>{nbLettres}</strong> lettre{nbLettres > 1 ? 's' : ''}
+              {nbMots > 1 && <> en <strong>{nbMots}</strong> mots</>}
+            </li>
+            <li>
+              Statut : <em>{statut}</em>
+            </li>
+          </ul>
+        </div>
+      )}
       <div className="typed-row">
         <input
           ref={localRef}

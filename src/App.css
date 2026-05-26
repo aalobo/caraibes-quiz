@@ -426,6 +426,49 @@
   font-style: italic;
 }
 
+.indices {
+  background: #fdf2f8;
+  border: 1px solid #fbcfe8;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.indices .motif {
+  margin: 0;
+  font-family: ui-monospace, 'Cascadia Code', Consolas, 'Courier New', monospace;
+  font-size: 1.1rem;
+  font-style: normal;
+  color: #c2185b;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+  background: #fff;
+  border-radius: 8px;
+  padding: 6px 8px;
+  border: 1px dashed #f9a8c4;
+}
+
+.indice-meta {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.82rem;
+  color: #4b5563;
+  line-height: 1.4;
+}
+
+.indice-meta li {
+  margin: 1px 0;
+}
+
+.indice-meta em {
+  font-style: normal;
+  color: #c2185b;
+  font-weight: 600;
+}
+
 .typed-row {
   display: flex;
   gap: 8px;
