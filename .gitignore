@@ -1,0 +1,4 @@
+node_modules
+dist
+.vite
+scripts/.ne_map_units.geojson
