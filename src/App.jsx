@@ -215,6 +215,9 @@ export default function App() {
   const [options, setOptions] = useState([])
   const [answer, setAnswer] = useState(null)
   const [score, setScore] = useState({ ok: 0, total: 0 })
+  // Territoires déjà répondus : leur nom reste affiché sur la carte
+  // même après "Suivant", pour qu'on construise progressivement l'atlas.
+  const [revealed, setRevealed] = useState(new Set())
   const inputRef = useRef(null)
 
   // Charge le geojson de la région choisie.
@@ -241,7 +244,20 @@ export default function App() {
     setOptions([])
     setAnswer(null)
     setScore({ ok: 0, total: 0 })
+    setRevealed(new Set())
   }, [region, niveau])
+
+  // Une fois la réponse donnée, le territoire entre dans la liste des révélés.
+  useEffect(() => {
+    if (answer && selected) {
+      setRevealed((prev) => {
+        if (prev.has(selected.properties.id)) return prev
+        const next = new Set(prev)
+        next.add(selected.properties.id)
+        return next
+      })
+    }
+  }, [answer, selected])
 
   // Autofocus du champ de saisie quand un territoire est sélectionné.
   useEffect(() => {
@@ -296,6 +312,7 @@ export default function App() {
 
   function reinitialiser() {
     setScore({ ok: 0, total: 0 })
+    setRevealed(new Set())
     suivant()
   }
 
@@ -339,8 +356,18 @@ export default function App() {
   // -------- Quiz screen --------
   const r = REGIONS[region]
   const cities = r.cities
-  const showLabel = selected && (mode === 'exploration' || !!answer)
-  const geoKey = `${region}-${mode}-${selected?.properties.id ?? 'none'}-${answer ? 'a' : 'q'}`
+  const showCurrentLabel = selected && (mode === 'exploration' || !!answer)
+  const currentId = selected?.properties.id
+
+  // Liste finale des territoires dont le NOM est affiché sur la carte :
+  // tous les révélés + (si applicable) le sélectionné en cours (dédoublonné).
+  const labeledIds = new Set(revealed)
+  if (showCurrentLabel && currentId) labeledIds.add(currentId)
+  const labeledFeatures = data
+    ? data.features.filter((f) => labeledIds.has(f.properties.id))
+    : []
+
+  const geoKey = `${region}-${mode}-${currentId ?? 'none'}-${answer ? 'a' : 'q'}`
   const pourcentage = score.total ? Math.round((score.ok / score.total) * 100) : 0
 
   return (
@@ -417,24 +444,22 @@ export default function App() {
                 onEachFeature={onEachFeature}
               />
             )}
-            {showLabel && (
-              <>
-                <Marker
-                  key={`land-${selected.properties.id}`}
-                  position={centroidOf(selected)}
-                  icon={buildTerritoryIcon(selected)}
-                  interactive={false}
-                />
-                {(cities[selected.properties.id] || []).map((v) => (
-                  <Marker
-                    key={`city-${selected.properties.id}-${v.nom}`}
-                    position={[v.lat, v.lng]}
-                    icon={buildCityIcon(v)}
-                    interactive={false}
-                  />
-                ))}
-              </>
-            )}
+            {labeledFeatures.map((f) => (
+              <Marker
+                key={`land-${f.properties.id}`}
+                position={centroidOf(f)}
+                icon={buildTerritoryIcon(f)}
+                interactive={false}
+              />
+            ))}
+            {showCurrentLabel && (cities[currentId] || []).map((v) => (
+              <Marker
+                key={`city-${currentId}-${v.nom}`}
+                position={[v.lat, v.lng]}
+                icon={buildCityIcon(v)}
+                interactive={false}
+              />
+            ))}
           </MapContainer>
         </div>
 
