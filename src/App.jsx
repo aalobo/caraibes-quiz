@@ -30,6 +30,66 @@ const REGIONS = {
     minZoom: 2,
     maxZoom: 8,
   },
+  europe: {
+    label: 'Europe',
+    emoji: '🏰',
+    fichier: 'europe.geojson',
+    cities: {},
+    bounds: [
+      [34, -25],
+      [72, 45],
+    ],
+    minZoom: 3,
+    maxZoom: 8,
+  },
+  asia: {
+    label: 'Asie',
+    emoji: '🏯',
+    fichier: 'asia.geojson',
+    cities: {},
+    bounds: [
+      [-11, 25],
+      [55, 150],
+    ],
+    minZoom: 2,
+    maxZoom: 8,
+  },
+  'north-america': {
+    label: 'Amérique du Nord',
+    emoji: '🗽',
+    fichier: 'north-america.geojson',
+    cities: {},
+    bounds: [
+      [7, -168],
+      [75, -52],
+    ],
+    minZoom: 2,
+    maxZoom: 8,
+  },
+  'south-america': {
+    label: 'Amérique du Sud',
+    emoji: '🌎',
+    fichier: 'south-america.geojson',
+    cities: {},
+    bounds: [
+      [-56, -82],
+      [13, -34],
+    ],
+    minZoom: 2,
+    maxZoom: 8,
+  },
+  oceania: {
+    label: 'Océanie',
+    emoji: '🦘',
+    fichier: 'oceania.geojson',
+    cities: {},
+    bounds: [
+      [-50, 110],
+      [25, 240],
+    ],
+    minZoom: 2,
+    maxZoom: 8,
+  },
 }
 
 const PALETTE = [
@@ -48,6 +108,12 @@ const STATUT_SHORT = {
   'Pays-Bas': 'P.-B.',
   'territoire des États-Unis': 'É.-U.',
   'territoire contesté': 'contesté',
+  'Danemark': 'DK',
+  'Norvège': 'NOR',
+  'Finlande': 'FIN',
+  'Nouvelle-Zélande': 'N.-Z.',
+  'Australie': 'AUS',
+  'Chine': 'CHN',
 }
 
 const NIVEAUX = {
